@@ -8,9 +8,6 @@ jobs:
     runs-on: macos-10.15
 
     steps:
-    - name: Install Go  
-      run: brew install golang
-
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
       with:
