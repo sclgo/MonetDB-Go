@@ -1,0 +1,30 @@
+name: Windows
+
+on: [push]
+
+jobs:
+  windows_wheel:
+    runs-on: windows-2019
+    env:
+      branch: Oct2020
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Install choco packages
+        run: choco install --no-progress -y winflexbison unzip curl
+      
+      - name: Get Golang
+        run: choco install golang
+
+      - name: Get dependencies
+        run: |
+          go get -v -t -d ./...
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Test
+        run: go test -v ./...
+
+        
