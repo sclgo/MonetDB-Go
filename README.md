@@ -14,6 +14,14 @@ the `go` tool. Make sure you have [Git](http://git-scm.com/downloads) installed.
 $ go get github.com/fajran/go-monetdb
 ```
 
+Then in your `go.mod`:
+
+```
+replace github.com/fajran/go-monetdb <version number> => github.com/MonetDB/MonetDB-Go <version number>
+```
+
+This ensures that this repo will be used.
+
 ## Usage
 
 This Go MonetDB driver implements Go's
