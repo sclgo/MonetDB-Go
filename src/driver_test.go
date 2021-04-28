@@ -55,4 +55,46 @@ func TestParseDSN(t *testing.T) {
 			t.Errorf("Invalid database: %s, expected: %s", c.Database, tc[5])
 		}
 	}
+
+}
+func TestParseIpv6DSN(t *testing.T) {
+	tcs := [][]string{
+		{"me:secret@[::1]:1234/testdb", "me", "secret", "[::1]", "1234", "testdb"},
+		{"me:secret@[1:2:3:4:5:6:7:8]:1234/testdb", "me", "secret", "[1:2:3:4:5:6:7:8]", "1234", "testdb"},
+	}
+
+	for _, tc := range tcs {
+		n := tc[0]
+		ok := len(tc) > 1
+		c, err := parseDSN(n)
+
+		if ok && err != nil {
+			t.Errorf("Error parsing DSN: %s -> %v", n, err)
+		} else if !ok && err == nil {
+			t.Errorf("Error parsing invalid DSN: %s", n)
+		}
+
+		if !ok || err != nil {
+			continue
+		}
+
+		port, _ := strconv.Atoi(tc[4])
+
+		if c.Username != tc[1] {
+			t.Errorf("Invalid username: %s, expected: %s", c.Username, tc[1])
+		}
+		if c.Password != tc[2] {
+			t.Errorf("Invalid password: %s, expected: %s", c.Password, tc[2])
+		}
+		if c.Hostname != tc[3] {
+			t.Errorf("Invalid hostname: %s, expected: %s", c.Hostname, tc[3])
+		}
+		if c.Port != port {
+			t.Errorf("Invalid port: %d, expected: %d", c.Port, port)
+		}
+		if c.Database != tc[5] {
+			t.Errorf("Invalid database: %s, expected: %s", c.Database, tc[5])
+		}
+	}
+
 }
