@@ -1,3 +1,3 @@
-module github.com/MonetDB/MonetDB-Go/v1
+module github.com/MonetDB/MonetDB-Go
 
 go 1.16
