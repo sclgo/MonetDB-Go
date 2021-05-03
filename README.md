@@ -13,16 +13,6 @@ the `go` tool. Make sure you have [Git](http://git-scm.com/downloads) installed.
 $ go get github.com/MonetDB/MonetDB-Go
 ```
 
-Then import it:
-
-```
-import(
-	_ "github.com/MonetDB/MonetDB-Go/src"
-)
-```
-
-This ensures that this repo will be used.
-
 ## Usage
 
 This Go MonetDB driver implements Go's
