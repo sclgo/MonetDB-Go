@@ -13,7 +13,7 @@ the `go` tool. Make sure you have [Git](http://git-scm.com/downloads) installed.
 $ go get github.com/MonetDB/MonetDB-Go
 ```
 
-Then in your `go.mod`:
+Then import it:
 
 ```
 import(
