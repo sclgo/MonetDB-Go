@@ -32,7 +32,7 @@ Once you import it, you can use the standard Go database API to access MonetDB.
 ```go
 import (
 	"database/sql"
-	_ "github.com/fajran/go-monetdb"
+	_ "github.com/MonetDB/MonetDB-Go/src"
 )
 ```
 
