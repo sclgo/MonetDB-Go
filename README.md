@@ -3,7 +3,6 @@ go-monetdb
 
 MonetDB driver for Go.
 
-[![Build Status](https://travis-ci.org/fajran/go-monetdb.png?branch=master)](https://travis-ci.org/fajran/go-monetdb)
 
 ## Installation
 
@@ -11,13 +10,15 @@ To install the `monetdb` package to your `$GOPATH`, simply use
 the `go` tool. Make sure you have [Git](http://git-scm.com/downloads) installed.
 
 ```bash
-$ go get github.com/fajran/go-monetdb
+$ go get github.com/MonetDB/MonetDB-Go
 ```
 
 Then in your `go.mod`:
 
 ```
-replace github.com/fajran/go-monetdb <version number> => github.com/MonetDB/MonetDB-Go <version number>
+import(
+	_ "github.com/MonetDB/MonetDB-Go/src"
+)
 ```
 
 This ensures that this repo will be used.
@@ -50,8 +51,6 @@ The format of the DSN is the following
 [username[:password]@]hostname[:port]/database
 ```
 
-Currently, you can only use a domain name or an IPv4 address for the hostname.
-IPv6 address is not yet supported. [Feel free to send pull request!](https://github.com/fajran/go-monetdb/issues/2)
 
 If the `port` is blank, then the default port `50000` will be used.
 
