@@ -29,6 +29,7 @@ const (
 	mdb_DOUBLE    = "double"   // 64 bit floating point
 	mdb_BOOLEAN   = "boolean"
 	mdb_DATE      = "date"
+	mdb_NULL      = "NULL"
 	mdb_TIME      = "time"      // (T) time of day
 	mdb_TIMESTAMP = "timestamp" // (T) date concatenated with unique time
 	mdb_INTERVAL  = "interval"  // (Q) a temporal interval
@@ -148,6 +149,7 @@ func toInt32(v string) (driver.Value, error) {
 	if err == nil {
 		r = int32(i)
 	}
+
 	return r, err
 }
 
@@ -157,6 +159,7 @@ func toInt64(v string) (driver.Value, error) {
 	if err == nil {
 		r = int64(i)
 	}
+
 	return r, err
 }
 
@@ -168,6 +171,10 @@ func parseTime(v string) (t time.Time, err error) {
 		}
 	}
 	return
+}
+
+func toNil(v string) (driver.Value, error) {
+	return "NULL", nil
 }
 
 func toBool(v string) (driver.Value, error) {
@@ -204,6 +211,7 @@ var toGoMappers = map[string]toGoConverter{
 	mdb_CLOB:           strip,
 	mdb_BLOB:           toByteArray,
 	mdb_DECIMAL:        toDouble,
+	mdb_NULL:           toNil,
 	mdb_SMALLINT:       toInt16,
 	mdb_INT:            toInt32,
 	mdb_WRD:            toInt32,
@@ -274,6 +282,7 @@ var toMonetMappers = map[string]toMonetConverter{
 	"bool":         toString,
 	"string":       toQuotedString,
 	"nil":          toNull,
+	"null":         toNull,
 	"[]uint8":      toByteString,
 	"time.Time":    toQuotedString,
 	"monetdb.Time": toDateTimeString,
@@ -281,6 +290,10 @@ var toMonetMappers = map[string]toMonetConverter{
 }
 
 func convertToGo(value, dataType string) (driver.Value, error) {
+	if strings.TrimSpace(value) == "NULL" {
+		dataType = "NULL"
+	}
+
 	if mapper, ok := toGoMappers[dataType]; ok {
 		value := strings.TrimSpace(value)
 		return mapper(value)

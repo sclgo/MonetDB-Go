@@ -53,8 +53,6 @@ func (r *Rows) Close() error {
 	return nil
 }
 
-var cnt = 0
-
 func (r *Rows) Next(dest []driver.Value) error {
 	if !r.active {
 		return fmt.Errorf("Rows closed")
@@ -86,17 +84,17 @@ func (r *Rows) Next(dest []driver.Value) error {
 	return nil
 }
 
-const (
-	c_ARRAY_SIZE = 100
-)
-
 func min(a, b int) int {
 	if a < b {
 		return a
-	} else {
-		return b
 	}
+
+	return b
 }
+
+const (
+	c_ARRAY_SIZE = 100
+)
 
 func (r *Rows) fetchNext() error {
 	if r.rowNum >= r.rowCount {
