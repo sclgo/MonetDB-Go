@@ -14,6 +14,7 @@ func TestParseDSN(t *testing.T) {
 		[]string{"me:secret@localhost:1234/testdb", "me", "secret", "localhost", "1234", "testdb"},
 		[]string{"me@localhost:1234/testdb", "me", "", "localhost", "1234", "testdb"},
 		[]string{"localhost:1234/testdb", "", "", "localhost", "1234", "testdb"},
+		[]string{"user:P@sswordWith@@localhost:50000/db", "user", "P@sswordWith@", "localhost", "50000", "db"},
 		[]string{"localhost/testdb", "", "", "localhost", "50000", "testdb"},
 		[]string{"localhost"},
 		[]string{"/testdb"},
