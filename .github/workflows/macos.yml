@@ -5,7 +5,7 @@ on: [push]
 jobs:
   build:
     name: Build
-    runs-on: macos-10.15
+    runs-on: macos-latest
 
     steps:
     - name: Set up Go 1.x
