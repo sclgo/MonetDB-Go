@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package monetdb
+package mapi
 
 import (
 	"strconv"
@@ -11,16 +11,16 @@ import (
 
 func TestParseDSN(t *testing.T) {
 	tcs := [][]string{
-		[]string{"me:secret@localhost:1234/testdb", "me", "secret", "localhost", "1234", "testdb"},
-		[]string{"me@localhost:1234/testdb", "me", "", "localhost", "1234", "testdb"},
-		[]string{"localhost:1234/testdb", "", "", "localhost", "1234", "testdb"},
-		[]string{"user:P@sswordWith@@localhost:50000/db", "user", "P@sswordWith@", "localhost", "50000", "db"},
-		[]string{"localhost/testdb", "", "", "localhost", "50000", "testdb"},
-		[]string{"localhost"},
-		[]string{"/testdb"},
-		[]string{"/"},
-		[]string{""},
-		[]string{":secret@localhost:1234/testdb"},
+		{"me:secret@localhost:1234/testdb", "me", "secret", "localhost", "1234", "testdb"},
+		{"me@localhost:1234/testdb", "me", "", "localhost", "1234", "testdb"},
+		{"localhost:1234/testdb", "", "", "localhost", "1234", "testdb"},
+		{"user:P@sswordWith@@localhost:50000/db", "user", "P@sswordWith@", "localhost", "50000", "db"},
+		{"localhost/testdb", "", "", "localhost", "50000", "testdb"},
+		{"localhost"},
+		{"/testdb"},
+		{"/"},
+		{""},
+		{":secret@localhost:1234/testdb"},
 	}
 
 	for _, tc := range tcs {

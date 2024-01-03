@@ -2,10 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package monetdb
+package mapi
 
 import (
-	"database/sql/driver"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -15,50 +14,50 @@ import (
 )
 
 const (
-	mdb_CHAR      = "char"    // (L) character string with length L
-	mdb_VARCHAR   = "varchar" // (L) string with atmost length L
-	mdb_CLOB      = "clob"
-	mdb_BLOB      = "blob"
-	mdb_DECIMAL   = "decimal"  // (P,S)
-	mdb_SMALLINT  = "smallint" // 16 bit integer
-	mdb_INT       = "int"      // 32 bit integer
-	mdb_BIGINT    = "bigint"   // 64 bit integer
-	mdb_HUGEINT   = "hugeint"  // 64 bit integer
-	mdb_SERIAL    = "serial"   // special 64 bit integer sequence generator
-	mdb_REAL      = "real"     // 32 bit floating point
-	mdb_DOUBLE    = "double"   // 64 bit floating point
-	mdb_BOOLEAN   = "boolean"
-	mdb_DATE      = "date"
-	mdb_NULL      = "NULL"
-	mdb_TIME      = "time"      // (T) time of day
-	mdb_TIMESTAMP = "timestamp" // (T) date concatenated with unique time
-	mdb_INTERVAL  = "interval"  // (Q) a temporal interval
+	MDB_CHAR      = "char"    // (L) character string with length L
+	MDB_VARCHAR   = "varchar" // (L) string with atmost length L
+	MDB_CLOB      = "clob"
+	MDB_BLOB      = "blob"
+	MDB_DECIMAL   = "decimal"  // (P,S)
+	MDB_SMALLINT  = "smallint" // 16 bit integer
+	MDB_INT       = "int"      // 32 bit integer
+	MDB_BIGINT    = "bigint"   // 64 bit integer
+	MDB_HUGEINT   = "hugeint"  // 64 bit integer
+	MDB_SERIAL    = "serial"   // special 64 bit integer sequence generator
+	MDB_REAL      = "real"     // 32 bit floating point
+	MDB_DOUBLE    = "double"   // 64 bit floating point
+	MDB_BOOLEAN   = "boolean"
+	MDB_DATE      = "date"
+	MDB_NULL      = "NULL"
+	MDB_TIME      = "time"      // (T) time of day
+	MDB_TIMESTAMP = "timestamp" // (T) date concatenated with unique time
+	MDB_INTERVAL  = "interval"  // (Q) a temporal interval
 
-	mdb_MONTH_INTERVAL = "month_interval"
-	mdb_SEC_INTERVAL   = "sec_interval"
-	mdb_WRD            = "wrd"
-	mdb_TINYINT        = "tinyint"
+	MDB_MONTH_INTERVAL = "month_interval"
+	MDB_SEC_INTERVAL   = "sec_interval"
+	MDB_WRD            = "wrd"
+	MDB_TINYINT        = "tinyint"
 
 	// Not on the website:
-	mdb_SHORTINT    = "shortint"
-	mdb_MEDIUMINT   = "mediumint"
-	mdb_LONGINT     = "longint"
-	mdb_FLOAT       = "float"
-	mdb_TIMESTAMPTZ = "timestamptz"
+	MDB_SHORTINT    = "shortint"
+	MDB_MEDIUMINT   = "mediumint"
+	MDB_LONGINT     = "longint"
+	MDB_FLOAT       = "float"
+	MDB_TIMESTAMPTZ = "timestamptz"
 
 	// full names and aliases, spaces are replaced with underscores
 	//lint:ignore U1000 prepare to enable staticchecks
-	mdb_CHARACTER               = mdb_CHAR
+	mdb_CHARACTER               = MDB_CHAR
 	//lint:ignore U1000 prepare to enable staticchecks
-	mdb_CHARACTER_VARYING       = mdb_VARCHAR
+	mdb_CHARACTER_VARYING       = MDB_VARCHAR
 	//lint:ignore U1000 prepare to enable staticchecks
-	mdb_CHARACHTER_LARGE_OBJECT = mdb_CLOB
+	mdb_CHARACHTER_LARGE_OBJECT = MDB_CLOB
 	//lint:ignore U1000 prepare to enable staticchecks
-	mdb_BINARY_LARGE_OBJECT     = mdb_BLOB
+	mdb_BINARY_LARGE_OBJECT     = MDB_BLOB
 	//lint:ignore U1000 prepare to enable staticchecks
-	mdb_NUMERIC                 = mdb_DECIMAL
+	mdb_NUMERIC                 = MDB_DECIMAL
 	//lint:ignore U1000 prepare to enable staticchecks
-	mdb_DOUBLE_PRECISION        = mdb_DOUBLE
+	mdb_DOUBLE_PRECISION        = MDB_DOUBLE
 )
 
 var timeFormats = []string{
@@ -67,13 +66,14 @@ var timeFormats = []string{
 	"2006-01-02 15:04:05 -0700",
 	"2006-01-02 15:04:05 -0700 MST",
 	"Mon Jan 2 15:04:05 -0700 MST 2006",
+	"2006-01-02 15:04:05.999999+00:00",
 	"15:04:05",
 }
 
-type toGoConverter func(string) (driver.Value, error)
-type toMonetConverter func(driver.Value) (string, error)
+type toGoConverter func(string) (Value, error)
+type toMonetConverter func(Value) (string, error)
 
-func strip(v string) (driver.Value, error) {
+func strip(v string) (Value, error) {
 	return unquote(strings.TrimSpace(v[1 : len(v)-1]))
 }
 
@@ -114,15 +114,15 @@ func unquote(s string) (string, error) {
 	return string(buf), nil
 }
 
-func toByteArray(v string) (driver.Value, error) {
+func toByteArray(v string) (Value, error) {
 	return []byte(v[1 : len(v)-1]), nil
 }
 
-func toDouble(v string) (driver.Value, error) {
+func toDouble(v string) (Value, error) {
 	return strconv.ParseFloat(v, 64)
 }
 
-func toFloat(v string) (driver.Value, error) {
+func toFloat(v string) (Value, error) {
 	var r float32
 	i, err := strconv.ParseFloat(v, 32)
 	if err == nil {
@@ -131,7 +131,7 @@ func toFloat(v string) (driver.Value, error) {
 	return r, err
 }
 
-func toInt8(v string) (driver.Value, error) {
+func toInt8(v string) (Value, error) {
 	var r int8
 	i, err := strconv.ParseInt(v, 10, 8)
 	if err == nil {
@@ -140,7 +140,7 @@ func toInt8(v string) (driver.Value, error) {
 	return r, err
 }
 
-func toInt16(v string) (driver.Value, error) {
+func toInt16(v string) (Value, error) {
 	var r int16
 	i, err := strconv.ParseInt(v, 10, 16)
 	if err == nil {
@@ -149,7 +149,7 @@ func toInt16(v string) (driver.Value, error) {
 	return r, err
 }
 
-func toInt32(v string) (driver.Value, error) {
+func toInt32(v string) (Value, error) {
 	var r int32
 	i, err := strconv.ParseInt(v, 10, 32)
 	if err == nil {
@@ -159,7 +159,7 @@ func toInt32(v string) (driver.Value, error) {
 	return r, err
 }
 
-func toInt64(v string) (driver.Value, error) {
+func toInt64(v string) (Value, error) {
 	var r int64
 	i, err := strconv.ParseInt(v, 10, 64)
 	if err == nil {
@@ -179,15 +179,15 @@ func parseTime(v string) (t time.Time, err error) {
 	return
 }
 
-func toNil(v string) (driver.Value, error) {
+func toNil(v string) (Value, error) {
 	return "NULL", nil
 }
 
-func toBool(v string) (driver.Value, error) {
+func toBool(v string) (Value, error) {
 	return strconv.ParseBool(v)
 }
 
-func toDate(v string) (driver.Value, error) {
+func toDate(v string) (Value, error) {
 	t, err := parseTime(v)
 	if err != nil {
 		return nil, err
@@ -196,7 +196,7 @@ func toDate(v string) (driver.Value, error) {
 	return Date{year, month, day}, nil
 }
 
-func toTime(v string) (driver.Value, error) {
+func toTime(v string) (Value, error) {
 	t, err := parseTime(v)
 	if err != nil {
 		return nil, err
@@ -204,69 +204,68 @@ func toTime(v string) (driver.Value, error) {
 	hour, min, sec := t.Clock()
 	return Time{hour, min, sec}, nil
 }
-func toTimestamp(v string) (driver.Value, error) {
+func toTimestamp(v string) (Value, error) {
 	return parseTime(v)
 }
-func toTimestampTz(v string) (driver.Value, error) {
+func toTimestampTz(v string) (Value, error) {
 	return parseTime(v)
 }
 
 var toGoMappers = map[string]toGoConverter{
-	mdb_CHAR:           strip,
-	mdb_VARCHAR:        strip,
-	mdb_CLOB:           strip,
-	mdb_BLOB:           toByteArray,
-	mdb_DECIMAL:        toDouble,
-	mdb_NULL:           toNil,
-	mdb_SMALLINT:       toInt16,
-	mdb_INT:            toInt32,
-	mdb_WRD:            toInt32,
-	mdb_BIGINT:         toInt64,
-	mdb_HUGEINT:        toInt64,
-	mdb_SERIAL:         toInt64,
-	mdb_REAL:           toFloat,
-	mdb_DOUBLE:         toDouble,
-	mdb_BOOLEAN:        toBool,
-	mdb_DATE:           toDate,
-	mdb_TIME:           toTime,
-	mdb_TIMESTAMP:      toTimestamp,
-	mdb_TIMESTAMPTZ:    toTimestampTz,
-	mdb_INTERVAL:       strip,
-	mdb_MONTH_INTERVAL: strip,
-	mdb_SEC_INTERVAL:   strip,
-	mdb_TINYINT:        toInt8,
-	mdb_SHORTINT:       toInt16,
-	mdb_MEDIUMINT:      toInt32,
-	mdb_LONGINT:        toInt64,
-	mdb_FLOAT:          toFloat,
+	MDB_CHAR:           strip,
+	MDB_VARCHAR:        strip,
+	MDB_CLOB:           strip,
+	MDB_BLOB:           toByteArray,
+	MDB_DECIMAL:        toDouble,
+	MDB_NULL:           toNil,
+	MDB_SMALLINT:       toInt16,
+	MDB_INT:            toInt32,
+	MDB_WRD:            toInt32,
+	MDB_BIGINT:         toInt64,
+	MDB_HUGEINT:        toInt64,
+	MDB_SERIAL:         toInt64,
+	MDB_REAL:           toFloat,
+	MDB_DOUBLE:         toDouble,
+	MDB_BOOLEAN:        toBool,
+	MDB_DATE:           toDate,
+	MDB_TIME:           toTime,
+	MDB_TIMESTAMP:      toTimestamp,
+	MDB_TIMESTAMPTZ:    toTimestampTz,
+	MDB_INTERVAL:       strip,
+	MDB_MONTH_INTERVAL: strip,
+	MDB_SEC_INTERVAL:   strip,
+	MDB_TINYINT:        toInt8,
+	MDB_SHORTINT:       toInt16,
+	MDB_MEDIUMINT:      toInt32,
+	MDB_LONGINT:        toInt64,
+	MDB_FLOAT:          toFloat,
 }
 
-func toString(v driver.Value) (string, error) {
+func toString(v Value) (string, error) {
 	return fmt.Sprintf("%v", v), nil
 }
 
-func toQuotedString(v driver.Value) (string, error) {
+func toQuotedString(v Value) (string, error) {
 	s := fmt.Sprintf("%v", v)
 	s = strings.Replace(s, "\\", "\\\\", -1)
 	s = strings.Replace(s, "'", "\\'", -1)
 	return fmt.Sprintf("'%v'", s), nil
 }
 
-func toNull(v driver.Value) (string, error) {
+func toNull(v Value) (string, error) {
 	return "NULL", nil
 }
 
-func toByteString(v driver.Value) (string, error) {
+func toByteString(v Value) (string, error) {
 	switch val := v.(type) {
 	case []uint8:
 		return toQuotedString(string(val))
 	default:
-		//lint:ignore ST1005 prepare to enable staticchecks
-		return "", fmt.Errorf("Unsupported type")
+		return "", fmt.Errorf("unsupported type")
 	}
 }
 
-func toDateTimeString(v driver.Value) (string, error) {
+func toDateTimeString(v Value) (string, error) {
 	switch val := v.(type) {
 	case Time:
 		return toQuotedString(fmt.Sprintf("%02d:%02d:%02d", val.Hour, val.Min, val.Sec))
@@ -293,11 +292,11 @@ var toMonetMappers = map[string]toMonetConverter{
 	"null":         toNull,
 	"[]uint8":      toByteString,
 	"time.Time":    toQuotedString,
-	"monetdb.Time": toDateTimeString,
-	"monetdb.Date": toDateTimeString,
+	"mapi.Time": toDateTimeString,
+	"mapi.Date": toDateTimeString,
 }
 
-func convertToGo(value, dataType string) (driver.Value, error) {
+func convertToGo(value, dataType string) (Value, error) {
 	if strings.TrimSpace(value) == "NULL" {
 		dataType = "NULL"
 	}
@@ -310,7 +309,7 @@ func convertToGo(value, dataType string) (driver.Value, error) {
 	return nil, fmt.Errorf("Type not supported: %s", dataType)
 }
 
-func convertToMonet(value driver.Value) (string, error) {
+func ConvertToMonet(value Value) (string, error) {
 	t := reflect.TypeOf(value)
 	n := "nil"
 	if t != nil {
