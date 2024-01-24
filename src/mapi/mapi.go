@@ -44,6 +44,10 @@ const mapi_STATE_READY = 1
 // MAPI connection is NOT established.
 const mapi_STATE_INIT = 0
 
+const (
+	MAPI_ARRAY_SIZE = 100
+)
+
 var (
 	mapi_MSG_MORE = string([]byte{1, 2, 10})
 )
@@ -67,6 +71,10 @@ type MapiConn struct {
 
 	State int
 
+	sizeHeader bool
+	replySize  int
+	autoCommit bool
+
 	conn *net.TCPConn
 }
 
@@ -89,6 +97,10 @@ func NewMapi(name string) (*MapiConn, error) {
 		Language: language,
 
 		State: mapi_STATE_INIT,
+
+		sizeHeader: true,
+		replySize : MAPI_ARRAY_SIZE,
+		autoCommit: true,
 	}, nil
 }
 
@@ -115,10 +127,23 @@ func (c *MapiConn) SetSizeHeader(enable bool) (string, error) {
 	var sizeheader int
 	if enable {
 		sizeheader = 1
-	} else {
-		sizeheader = 0
 	}
+	// We don't need an else here, the sizehandler is initialized to 0 by default
 	cmd := fmt.Sprintf("Xsizeheader %d", sizeheader)
+	return c.cmd(cmd)
+}
+
+func (c *MapiConn) SetReplySize(size int) (string, error) {
+	cmd := fmt.Sprintf("Xreply_size %d", size)
+	return c.cmd(cmd)
+}
+
+func (c *MapiConn) SetAutoCommit(enable bool) (string, error) {
+	var autoCommit int
+	if enable {
+		autoCommit = 1
+	}
+	cmd := fmt.Sprintf("Xauto_commit %d", autoCommit)
 	return c.cmd(cmd)
 }
 
@@ -369,9 +394,7 @@ func (c *MapiConn) putBlock(b []byte) error {
 			last = 1
 		}
 
-		//lint:ignore S1021 prepare to enable staticchecks
-		var packed uint16
-		packed = uint16((length << 1) + last)
+		packed := uint16((length << 1) + last)
 		flag := new(bytes.Buffer)
 		binary.Write(flag, binary.LittleEndian, packed)
 
