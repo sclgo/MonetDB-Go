@@ -12,7 +12,7 @@ import (
 const DriverVersion = "2.0.0"
 
 func init() {
-	sql.Register("monetdb", &Driver{})
+	sql.Register("monetdbscl", &Driver{})
 }
 
 type Driver struct {
